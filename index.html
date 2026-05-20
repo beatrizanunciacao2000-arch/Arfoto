@@ -75,8 +75,7 @@ alpha:true;
 
       <a-assets>
 
-        <video id="video" src="./video.mp4" muted loop playsinline webkit-playsinline crossorigin="anonymous"
-          preload="auto">
+        <video id="video" src="./video.mp4" loop playsinline webkit-playsinline crossorigin="anonymous" preload="auto">
         </video>
 
       </a-assets>
@@ -93,7 +92,12 @@ alpha:true;
 
     </a-scene>
 
+
   </div>
+
+
+
+
 
   <script>
 
@@ -208,6 +212,28 @@ alpha:true;
       console.log("Proporção:", ratio);
 
     };
+
+    document.body.addEventListener("click", async () => {
+
+      try {
+
+        await video.play();
+
+        video.pause();
+
+        video.currentTime = 0;
+
+        avisar("Áudio liberado.");
+
+      } catch (e) {
+
+        avisar("Erro ao liberar áudio.");
+
+        console.log(e);
+
+      }
+
+    }, { once: true });
 
   </script>
 
