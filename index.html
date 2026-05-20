@@ -1,201 +1,216 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
 
-<meta name="viewport"
-content="width=device-width,
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width,
 initial-scale=1.0,
 maximum-scale=1.0,
 user-scalable=no">
 
-<meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
 
-<title>AR</title>
+  <title>AR</title>
 
-<script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
-<style>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
 
-html,
-body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#000;
-}
+    #ar-container {
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      inset: 0;
+    }
 
-#ar-container{
-  width:100vw;
-  height:100vh;
-  position:fixed;
-  inset:0;
-}
+    #msg {
+      position: fixed;
+      bottom: 20px;
+      left: 10px;
+      right: 10px;
+      z-index: 99999;
+      color: #fff;
+      background: rgba(0, 0, 0, .7);
+      padding: 10px;
+      border-radius: 10px;
+      font-family: Arial;
+    }
 
-#msg{
-  position:fixed;
-  bottom:20px;
-  left:10px;
-  right:10px;
-  z-index:99999;
-  color:#fff;
-  background:rgba(0,0,0,.7);
-  padding:10px;
-  border-radius:10px;
-  font-family:Arial;
-}
-
-#video{
-  display:none;
-}
-
-</style>
+    #video {
+      display: none;
+    }
+  </style>
 </head>
 
 <body>
 
-<div id="msg">
-Carregando câmera...
-</div>
+  <div id="msg">
+    Carregando câmera...
+  </div>
 
-<div id="ar-container">
+  <div id="ar-container">
 
-<a-scene
-
-mindar-image="
+    <a-scene mindar-image="
 imageTargetSrc: ./targets.mind;
 uiLoading:no;
 uiScanning:no;
 uiError:no;
-"
-
-color-space="sRGB"
-
-renderer="
+" color-space="sRGB" renderer="
 colorManagement:true;
 physicallyCorrectLights:false;
 antialias:true;
 alpha:true;
-"
+" vr-mode-ui="enabled:false" device-orientation-permission-ui="enabled:false" loading-screen="enabled:false">
 
-vr-mode-ui="enabled:false"
+      <a-assets>
 
-device-orientation-permission-ui="enabled:false"
+        <video id="video" src="./video.mp4" muted loop playsinline webkit-playsinline crossorigin="anonymous"
+          preload="auto">
+        </video>
 
-loading-screen="enabled:false"
+      </a-assets>
 
->
+      <a-camera position="0 0 0" look-controls="enabled:false">
+      </a-camera>
 
-<a-assets>
+      <a-entity id="target" mindar-image-target="targetIndex: 0">
 
-<video
-id="video"
-src="./video.mp4"
-muted
-loop
-playsinline
-webkit-playsinline
-crossorigin="anonymous"
-preload="auto">
-</video>
+        <a-video id="videoPlane" src="#video" position="0 0 0.01">
+        </a-video>
 
-</a-assets>
+      </a-entity>
 
-<a-camera
-position="0 0 0"
-look-controls="enabled:false">
-</a-camera>
+    </a-scene>
 
-<a-entity
-id="target"
-mindar-image-target="targetIndex: 0">
+  </div>
 
-<a-video
-src="#video"
-width="1"
-height="1.45"
-position="0 0 0">
-</a-video>
+  <script>
 
-</a-entity>
+    const msg = document.querySelector("#msg");
+    const video = document.querySelector("#video");
+    const target = document.querySelector("#target");
 
-</a-scene>
+    function avisar(t) {
+      msg.innerText = t;
+      console.log(t);
+    }
 
-</div>
+    window.addEventListener("click", async () => {
 
-<script>
+      try {
+        await video.play();
+        video.pause();
+        video.currentTime = 0;
+      } catch (e) { }
 
-const msg = document.querySelector("#msg");
-const video = document.querySelector("#video");
-const target = document.querySelector("#target");
+    }, { once: true });
 
-function avisar(t){
-  msg.innerText = t;
-  console.log(t);
-}
+    document
+      .querySelector("a-scene")
+      .addEventListener("renderstart", () => {
 
-window.addEventListener("click", async ()=>{
+        avisar("Câmera iniciada.");
 
-  try{
-    await video.play();
-    video.pause();
-    video.currentTime = 0;
-  }catch(e){}
+      });
 
-},{once:true});
+    document
+      .querySelector("a-scene")
+      .addEventListener("arReady", () => {
 
-document
-.querySelector("a-scene")
-.addEventListener("renderstart", ()=>{
+        avisar("Aponte para a imagem.");
 
-  avisar("Câmera iniciada.");
+      });
 
-});
+    document
+      .querySelector("a-scene")
+      .addEventListener("arError", () => {
 
-document
-.querySelector("a-scene")
-.addEventListener("arReady", ()=>{
+        avisar("Erro ao abrir câmera.");
 
-  avisar("Aponte para a imagem.");
+      });
 
-});
+    target.addEventListener("targetFound", async () => {
 
-document
-.querySelector("a-scene")
-.addEventListener("arError", ()=>{
+      avisar("Imagem encontrada.");
 
-  avisar("Erro ao abrir câmera.");
+      try {
 
-});
+        video.currentTime = 0;
+        await video.play();
 
-target.addEventListener("targetFound", async ()=>{
+      } catch (e) {
 
-  avisar("Imagem encontrada.");
+        avisar("Toque na tela.");
 
-  try{
+      }
 
-    video.currentTime = 0;
-    await video.play();
+    });
 
-  }catch(e){
+    target.addEventListener("targetLost", () => {
 
-    avisar("Toque na tela.");
+      avisar("Imagem perdida.");
+      video.pause();
 
-  }
+    });
 
-});
 
-target.addEventListener("targetLost", ()=>{
 
-  avisar("Imagem perdida.");
-  video.pause();
+  </script>
 
-});
+  <script>
 
-</script>
+    const video = document.querySelector("#video");
+    const videoPlane = document.querySelector("#videoPlane");
+
+    video.addEventListener("loadedmetadata", () => {
+
+      const videoWidth = video.videoWidth;
+      const videoHeight = video.videoHeight;
+
+      const ratio = videoHeight / videoWidth;
+
+      videoPlane.setAttribute("width", 1);
+      videoPlane.setAttribute("height", ratio);
+
+      console.log("Proporção ajustada:", ratio);
+
+    });
+
+  </script>
+
+  <script>
+
+    const img = new Image();
+
+    img.src = "./target.png"; // A MESMA imagem usada no targets.mind
+
+    img.onload = () => {
+
+      const plane = document.querySelector("#videoPlane");
+
+      const ratio = img.height / img.width;
+
+      plane.setAttribute("width", 1);
+      plane.setAttribute("height", ratio);
+
+      console.log("Imagem alvo carregada");
+      console.log("Proporção:", ratio);
+
+    };
+
+  </script>
 
 </body>
+
 </html>
