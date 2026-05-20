@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Foto AR</title>
 
@@ -10,133 +10,112 @@
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
 <style>
-
-html,
-body{
-    margin:0;
-    padding:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#000;
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
 }
 
-a-scene{
-    position:fixed !important;
-    inset:0 !important;
-    width:100vw !important;
-    height:100vh !important;
+a-scene {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw !important;
+  height: 100vh !important;
 }
 
-canvas{
-    width:100vw !important;
-    height:100vh !important;
+canvas {
+  width: 100vw !important;
+  height: 100vh !important;
 }
 
-video#video{
-    display:none;
+#video {
+  visibility: hidden;
+  position: absolute;
+  width: 1px;
+  height: 1px;
 }
 
-.loading{
-    position:fixed;
-    inset:0;
-    background:#000;
-    color:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:9999;
-    font-family:Arial;
-    font-size:18px;
+#loading {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  color: #fff;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial;
+  font-size: 18px;
 }
-
 </style>
 </head>
 
 <body>
 
-<div class="loading" id="loading">
-Abrindo câmera...
-</div>
+<div id="loading">Abrindo câmera...</div>
 
 <a-scene
-mindar-image="imageTargetSrc: targets.mind;"
-color-space="sRGB"
-renderer="colorManagement: true"
-vr-mode-ui="enabled: false"
-device-orientation-permission-ui="enabled: false"
-embedded
+  mindar-image="imageTargetSrc: ./targets.mind;"
+  color-space="sRGB"
+  renderer="colorManagement: true"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false"
+  embedded
 >
 
-<a-assets timeout="10000">
-
-<video
-id="video"
-src="./video.mp4"
-preload="auto"
-muted
-loop
-playsinline
-webkit-playsinline
-crossorigin="anonymous">
-</video>
-
+<a-assets timeout="30000">
+  <video
+    id="video"
+    src="./video.mp4"
+    preload="auto"
+    muted
+    loop
+    playsinline
+    webkit-playsinline>
+  </video>
 </a-assets>
 
-<a-camera
-position="0 0 0"
-look-controls="enabled: false">
-</a-camera>
+<a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
 <a-entity mindar-image-target="targetIndex: 0">
-
-<a-video
-src="#video"
-width="1"
-height="1.45"
-position="0 0 0.01">
-</a-video>
-
+  <a-video
+    src="#video"
+    width="1"
+    height="1.45"
+    position="0 0 0.01">
+  </a-video>
 </a-entity>
 
 </a-scene>
 
 <script>
-
 const video = document.querySelector("#video");
+const loading = document.querySelector("#loading");
 
-document.addEventListener("DOMContentLoaded", () => {
-
-    const scene = document.querySelector("a-scene");
-
-    scene.addEventListener("loaded", () => {
-
-        document.getElementById("loading").style.display = "none";
-
-    });
-
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    loading.style.display = "none";
+  }, 3000);
 });
 
-document.querySelector('a-scene').addEventListener("targetFound", async () => {
+const target = document.querySelector("[mindar-image-target]");
 
-    try {
-
-        await video.play();
-
-    } catch(e){
-
-        console.log(e);
-
-    }
-
+target.addEventListener("targetFound", async () => {
+  try {
+    video.currentTime = 0;
+    await video.play();
+  } catch (e) {
+    console.log("Erro ao tocar vídeo:", e);
+  }
 });
 
-document.querySelector('a-scene').addEventListener("targetLost", () => {
-
-    video.pause();
-
+target.addEventListener("targetLost", () => {
+  video.pause();
 });
-
 </script>
 
 </body>
