@@ -61,7 +61,8 @@ user-scalable=no">
 
   <div id="ar-container">
 
-    <a-scene mindar-image="
+    <a-scene 
+    mindar-image="
 imageTargetSrc: ./targets.mind;
 uiLoading:no;
 uiScanning:no;
@@ -69,8 +70,8 @@ uiError:no;
 
 maxTrack:1;
 
-filterMinCF:0.0001;
-filterBeta:0.001;
+filterMinCF:1;
+filterBeta:1000;
 
 warmupTolerance:5;
 missTolerance:5;
