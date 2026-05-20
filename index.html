@@ -61,8 +61,17 @@ user-scalable=no">
 
   <div id="ar-container">
 
-    <a-scene 
-    mindar-image="
+    <a-scene webcamTexture="
+videoConstraints:
+{
+video:
+{
+width:{ideal:1920},
+height:{ideal:1080},
+facingMode:'environment'
+}
+}
+" mindar-image="
 imageTargetSrc: ./targets.mind;
 uiLoading:no;
 uiScanning:no;
@@ -75,14 +84,16 @@ filterBeta:1000;
 
 warmupTolerance:5;
 missTolerance:5;
-" color-space="sRGB" 
-renderer="
-precision: high;
-antialias: true;
-alpha: true;
-colorManagement: true;
-physicallyCorrectLights: false;
-sortObjects: true;
+" color-space="sRGB" renderer="
+antialias:true;
+alpha:true;
+
+precision:high;
+
+logarithmicDepthBuffer:true;
+
+colorManagement:true;
+physicallyCorrectLights:false;
 " vr-mode-ui="enabled:false" device-orientation-permission-ui="enabled:false" loading-screen="enabled:false">
 
       <a-assets>
@@ -93,15 +104,15 @@ sortObjects: true;
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled:false" camera="
-near: 0.01;
-far: 10000;
-fov: 45;
+fov:45;
+near:0.01;
+far:10000;
 ">
       </a-camera>
 
       <a-entity id="target" mindar-image-target="targetIndex: 0">
 
-        <a-video id="videoPlane" src="#video" position="0 0 0.01">
+        <a-video id="videoPlane" src="#video" position="0 0 0">
         </a-video>
 
       </a-entity>
