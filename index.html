@@ -2,122 +2,199 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Foto AR</title>
+<meta name="viewport"
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<title>AR</title>
 
 <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
 <style>
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #000;
-  font-family: Arial, sans-serif;
+
+html,
+body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#000;
 }
 
-a-scene {
-  width: 100vw;
-  height: 100vh;
+#ar-container{
+  width:100vw;
+  height:100vh;
+  position:fixed;
+  inset:0;
 }
 
-#start {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  background: #000;
-  color: #fff;
-  border: none;
-  font-size: 20px;
+#msg{
+  position:fixed;
+  bottom:20px;
+  left:10px;
+  right:10px;
+  z-index:99999;
+  color:#fff;
+  background:rgba(0,0,0,.7);
+  padding:10px;
+  border-radius:10px;
+  font-family:Arial;
 }
 
-#video {
-  display: none;
+#video{
+  display:none;
 }
+
 </style>
 </head>
 
 <body>
 
-<button id="start">Toque para iniciar a câmera</button>
+<div id="msg">
+Carregando câmera...
+</div>
+
+<div id="ar-container">
 
 <a-scene
-  id="scene"
-  mindar-image="imageTargetSrc: ./targets.mind; autoStart: false;"
-  color-space="sRGB"
-  renderer="colorManagement: true; antialias: true;"
-  vr-mode-ui="enabled: false"
-  device-orientation-permission-ui="enabled: false"
-  embedded
+
+mindar-image="
+imageTargetSrc: ./targets.mind;
+uiLoading:no;
+uiScanning:no;
+uiError:no;
+"
+
+color-space="sRGB"
+
+renderer="
+colorManagement:true;
+physicallyCorrectLights:false;
+antialias:true;
+alpha:true;
+"
+
+vr-mode-ui="enabled:false"
+
+device-orientation-permission-ui="enabled:false"
+
+loading-screen="enabled:false"
+
 >
 
 <a-assets>
-  <video
-    id="video"
-    src="./video.mp4"
-    preload="auto"
-    muted
-    loop
-    playsinline
-    webkit-playsinline
-    crossorigin="anonymous">
-  </video>
+
+<video
+id="video"
+src="./video.mp4"
+muted
+loop
+playsinline
+webkit-playsinline
+crossorigin="anonymous"
+preload="auto">
+</video>
+
 </a-assets>
 
-<a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+<a-camera
+position="0 0 0"
+look-controls="enabled:false">
+</a-camera>
 
-<a-entity id="target" mindar-image-target="targetIndex: 0">
+<a-entity
+id="target"
+mindar-image-target="targetIndex: 0">
 
-  <a-video
-    src="#video"
-    width="1"
-    height="1.45"
-    position="0 0 0.01"
-    rotation="0 0 0">
-  </a-video>
+<a-video
+src="#video"
+width="1"
+height="1.45"
+position="0 0 0">
+</a-video>
 
 </a-entity>
 
 </a-scene>
 
+</div>
+
 <script>
-const startBtn = document.querySelector("#start");
+
+const msg = document.querySelector("#msg");
 const video = document.querySelector("#video");
-const scene = document.querySelector("#scene");
 const target = document.querySelector("#target");
 
-startBtn.addEventListener("click", async () => {
-  startBtn.style.display = "none";
+function avisar(t){
+  msg.innerText = t;
+  console.log(t);
+}
 
-  try {
+window.addEventListener("click", async ()=>{
+
+  try{
     await video.play();
     video.pause();
     video.currentTime = 0;
-  } catch (e) {
-    console.log("Vídeo liberado após toque.");
-  }
+  }catch(e){}
 
-  const mindarSystem = scene.systems["mindar-image-system"];
-  await mindarSystem.start();
+},{once:true});
+
+document
+.querySelector("a-scene")
+.addEventListener("renderstart", ()=>{
+
+  avisar("Câmera iniciada.");
+
 });
 
-target.addEventListener("targetFound", async () => {
-  video.currentTime = 0;
+document
+.querySelector("a-scene")
+.addEventListener("arReady", ()=>{
 
-  try {
+  avisar("Aponte para a imagem.");
+
+});
+
+document
+.querySelector("a-scene")
+.addEventListener("arError", ()=>{
+
+  avisar("Erro ao abrir câmera.");
+
+});
+
+target.addEventListener("targetFound", async ()=>{
+
+  avisar("Imagem encontrada.");
+
+  try{
+
+    video.currentTime = 0;
     await video.play();
-  } catch (e) {
-    console.log("Erro ao tocar vídeo:", e);
+
+  }catch(e){
+
+    avisar("Toque na tela.");
+
   }
+
 });
 
-target.addEventListener("targetLost", () => {
+target.addEventListener("targetLost", ()=>{
+
+  avisar("Imagem perdida.");
   video.pause();
+
 });
+
 </script>
 
 </body>
