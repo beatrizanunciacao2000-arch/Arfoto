@@ -1,122 +1,134 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>Foto AR</title>
+  <title>Foto AR</title>
 
-<script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
-<style>
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #000;
-}
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
 
-a-scene {
-  position: fixed !important;
-  top: 0;
-  left: 0;
-  width: 100vw !important;
-  height: 100vh !important;
-}
+    a-scene {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+    }
 
-canvas {
-  width: 100vw !important;
-  height: 100vh !important;
-}
+    canvas {
+      width: 100vw !important;
+      height: 100vh !important;
+    }
 
-#video {
-  visibility: hidden;
-  position: absolute;
-  width: 1px;
-  height: 1px;
-}
+    video#video {
+      opacity: 0;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      pointer-events: none;
+    }
 
-#loading {
-  position: fixed;
-  inset: 0;
-  background: #000;
-  color: #fff;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: Arial;
-  font-size: 18px;
-}
-</style>
+    video:not(#video) {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    .loading {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      font-family: Arial;
+      font-size: 18px;
+    }
+  </style>
 </head>
 
 <body>
 
-<div id="loading">Abrindo câmera...</div>
+  <div class="loading" id="loading">
+    Abrindo câmera...
+  </div>
 
-<a-scene
-  mindar-image="imageTargetSrc: ./targets.mind;"
-  color-space="sRGB"
-  renderer="colorManagement: true"
-  vr-mode-ui="enabled: false"
-  device-orientation-permission-ui="enabled: false"
-  embedded
->
+  <a-scene mindar-image="imageTargetSrc: targets.mind;" color-space="sRGB" renderer="colorManagement: true"
+    vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" embedded>
 
-<a-assets timeout="30000">
-  <video
-    id="video"
-    src="./video.mp4"
-    preload="auto"
-    muted
-    loop
-    playsinline
-    webkit-playsinline>
-  </video>
-</a-assets>
+    <a-assets timeout="10000">
 
-<a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      <video id="video" src="./video.mp4" preload="auto" muted loop playsinline webkit-playsinline
+        crossorigin="anonymous">
+      </video>
 
-<a-entity mindar-image-target="targetIndex: 0">
-  <a-video
-    src="#video"
-    width="1"
-    height="1.45"
-    position="0 0 0.01">
-  </a-video>
-</a-entity>
+    </a-assets>
 
-</a-scene>
+    <a-camera position="0 0 0" look-controls="enabled: false">
+    </a-camera>
 
-<script>
-const video = document.querySelector("#video");
-const loading = document.querySelector("#loading");
+    <a-entity mindar-image-target="targetIndex: 0">
 
-window.addEventListener("load", () => {
-  setTimeout(() => {
-    loading.style.display = "none";
-  }, 3000);
-});
+      <a-video src="#video" width="1" height="1.45" position="0 0 0.01">
+      </a-video>
 
-const target = document.querySelector("[mindar-image-target]");
+    </a-entity>
 
-target.addEventListener("targetFound", async () => {
-  try {
-    video.currentTime = 0;
-    await video.play();
-  } catch (e) {
-    console.log("Erro ao tocar vídeo:", e);
-  }
-});
+  </a-scene>
 
-target.addEventListener("targetLost", () => {
-  video.pause();
-});
-</script>
+  <script>
+
+    const video = document.querySelector("#video");
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+      const scene = document.querySelector("a-scene");
+
+      scene.addEventListener("loaded", () => {
+
+        document.getElementById("loading").style.display = "none";
+
+      });
+
+    });
+
+    document.querySelector('a-scene').addEventListener("targetFound", async () => {
+
+      try {
+
+        await video.play();
+
+      } catch (e) {
+
+        console.log(e);
+
+      }
+
+    });
+
+    document.querySelector('a-scene').addEventListener("targetLost", () => {
+
+      video.pause();
+
+    });
+
+  </script>
 
 </body>
+
 </html>
